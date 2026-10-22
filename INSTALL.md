@@ -13,7 +13,7 @@ Termux не поддерживается — часть зависимостей
 
 В терминале UserLAnd (Ubuntu) — одна команда:
 
-\\ash
+ash
 bash <(curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/master/install.sh)
 \
 Скрипт сам установит всё нужное, получит код и запустит бота. Останется ввести номер телефона и код из Telegram.
@@ -25,7 +25,7 @@ UserLAnd останавливает Linux вместе с Android. Для пов
 1. Открой UserLAnd → сессия Ubuntu
 2. В терминале:
 
-\\ash
+ash
 bash <(curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/master/install.sh)
 \
 Скрипт запомнит, что бот уже установлен, и просто запустит его. Если вышла новая версия — он обновится и запустит её.
@@ -38,6 +38,6 @@ bash <(curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/
 
 ## Удаление
 
-\\ash
+ash
 rm -rf ~/Heroku
 \
