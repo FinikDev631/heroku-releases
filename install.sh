@@ -132,7 +132,7 @@ install_system_packages() {
 	elif command -v apt-get >/dev/null 2>&1 && is_minimal; then
 		info "Минимальный режим: ставлю только нужные пакеты."
 		sudo_run apt-get update
-		sudo_run apt-get install -y git python3 python3-venv curl openssl
+		sudo_run apt-get install -y git python3 python3-venv curl openssl ca-certificates
 	elif command -v apt-get >/dev/null 2>&1; then
 		sudo_run apt-get update
 		sudo_run apt-get install -y \
@@ -150,12 +150,14 @@ install_system_packages() {
 			libwebp-dev \
 			libz-dev \
 			openssl \
+			ca-certificates \
 			python3 \
 			python3-dev \
 			python3-pip \
 			python3-venv
 	elif command -v pacman >/dev/null 2>&1; then
 		sudo_run pacman -Sy --needed --noconfirm \
+			ca-certificates \
 			base-devel \
 			curl \
 			ffmpeg \
@@ -167,6 +169,7 @@ install_system_packages() {
 			python-pip
 	elif command -v dnf >/dev/null 2>&1; then
 		sudo_run dnf install -y \
+			ca-certificates \
 			curl \
 			ffmpeg \
 			file-libs \
@@ -179,7 +182,7 @@ install_system_packages() {
 			python3-devel \
 			python3-pip
 	elif command -v brew >/dev/null 2>&1; then
-		run brew install git openssl jpeg webp
+		run brew install git openssl ca-certificates jpeg webp
 	else
 		info "Неизвестный пакетный менеджер — пропускаю установку системных пакетов."
 	fi
