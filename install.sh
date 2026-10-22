@@ -334,6 +334,15 @@ start_app() {
 }
 
 main() {
+	# Без терминального stdin (например, bash <(curl ...)) бот не сможет
+	# ничего спросить — перекачаем себя в файл и перезапустимся с tty.
+	if [ ! -t 0 ] && ! (: </dev/tty) 2>/dev/null && command -v curl >/dev/null 2>&1 && [ "${HEROKU_INSTALLER_REEXEC:-}" != "1" ]; then
+		info "Нет доступа к клавиатуре — перекачиваю установщик на диск..."
+		dest="/tmp/heroku-installer.sh"
+		curl -fsSL "${HEROKU_INSTALLER_URL:-https://raw.githubusercontent.com/FinikDev631/heroku-releases/master/install.sh}" -o "$dest" || fail "Не удалось скачать установщик." 7
+		HEROKU_INSTALLER_REEXEC=1 exec bash "$dest"
+	fi
+
 	if root="$(find_root)"; then
 		cd "$root"
 	fi
