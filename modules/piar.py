@@ -5,6 +5,9 @@
 
 import asyncio
 import logging
+import time
+
+import herokutl.errors as herokutl_errors
 
 from herokutl.tl.types import Message
 
@@ -37,12 +40,18 @@ class PiarMod(loader.Module):
 
         try:
             while True:
+                started = time.time()
                 try:
                     await self._client.send_message(chat_id, text)
+                except herokutl_errors.FloodWaitError as e:
+                    logger.warning("Piar flood wait %ss", e.duration)
+                    await asyncio.sleep(e.duration + 1)
+                    continue
                 except Exception:
                     logger.exception("Failed to send piar message")
 
-                await asyncio.sleep(interval)
+                elapsed = time.time() - started
+                await asyncio.sleep(max(1, interval - elapsed))
         except asyncio.CancelledError:
             pass
 
