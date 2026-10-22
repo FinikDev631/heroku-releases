@@ -13,10 +13,39 @@ Termux не поддерживается — часть зависимостей
 
 В терминале UserLAnd (Ubuntu) — одна команда:
 
-ash
-bash <(curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/master/install.sh)
-\
+```bash
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/master/install.sh)
+```
+
 Скрипт сам установит всё нужное, получит код и запустит бота. Останется ввести номер телефона и код из Telegram.
+
+## Проблемы и решения
+
+### `curl: (77) error adding trust anchors` / ошибки сертификата
+
+Битые/пустые сертификаты в свежем образе. Чинится так:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y ca-certificates
+sudo update-ca-certificates
+```
+
+Повтори установку. Если и `apt-get update` ругается на сертификаты:
+
+```bash
+sudo apt-get -o Acquire::https::Verify-Peer=false update
+sudo apt-get install -y --allow-unauthenticated ca-certificates
+sudo update-ca-certificates
+```
+
+### `Termux is not supported`
+
+Ты открыл установщик в Termux — он не поддерживается. Ставь через UserLAnd (см. шаг 1).
+
+### Другие ошибки
+
+Пришлю скриншот ошибки в официальный чат — разберём.
 
 ## 3. Запуск после перезагрузки телефона
 
@@ -25,10 +54,11 @@ UserLAnd останавливает Linux вместе с Android. Для пов
 1. Открой UserLAnd → сессия Ubuntu
 2. В терминале:
 
-ash
-bash <(curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/master/install.sh)
-\
-Скрипт запомнит, что бот уже установлен, и просто запустит его. Если вышла новая версия — он обновится и запустит её.
+```bash
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/master/install.sh)
+```
+
+Скрипт запомнит, что Heroku уже установлен, и просто запустит его. Если вышла новая версия — он обновится и запустит её.
 
 > Android может убивать фоновый процесс. Отключи оптимизацию батареи для UserLAnd (Настройки → Батарея → Не ограничивать).
 
@@ -38,6 +68,6 @@ bash <(curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/
 
 ## Удаление
 
-ash
+```bash
 rm -rf ~/Heroku
-\
+```
