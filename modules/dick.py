@@ -3,6 +3,7 @@
 # 🔑 https://www.gnu.org/licenses/agpl-3.0.html
 
 import random
+import time
 
 from herokutl.tl.types import Message
 
@@ -20,8 +21,7 @@ class DickMeterMod(loader.Module):
         "cheat_grow": "измена! дилдак вырос на <b>{grow} см</b>, теперь <b>{size} см</b>",
         "activated": "<b>измена активирована в этом чате</b>",
         "deactivated": "<b>измена выключена в этом чате</b>",
-        "already_on": "<b>измена уже включена тут</b>",
-        "already_off": "<b>измена уже выключена тут</b>",
+        "wait": "<b>ты уже мерил, приходи через {mins} мин</b>",
     }
 
     strings_ru = {
@@ -30,8 +30,7 @@ class DickMeterMod(loader.Module):
         "cheat_grow": "измена! дилдак вырос на <b>{grow} см</b>, теперь <b>{size} см</b>",
         "activated": "<b>измена активирована в этом чате</b>",
         "deactivated": "<b>измена выключена в этом чате</b>",
-        "already_on": "<b>измена уже включена тут</b>",
-        "already_off": "<b>измена уже выключена тут</b>",
+        "wait": "<b>ты уже мерил, приходи через {mins} мин</b>",
     }
 
     def __init__(self):
@@ -48,6 +47,12 @@ class DickMeterMod(loader.Module):
                 lambda: "максимальный прирост за измену (см)",
                 validator=loader.validators.Integer(minimum=1, maximum=50),
             ),
+            loader.ConfigValue(
+                "cooldown",
+                3600,
+                lambda: "перерыв между замерами в секундах (3600 = 1 час)",
+                validator=loader.validators.Integer(minimum=60),
+            ),
         )
 
     def _chat_key(self, message: Message) -> str:
@@ -60,18 +65,36 @@ class DickMeterMod(loader.Module):
     async def дик(self, message: Message):
         """- меряет дилдак и показывает текущую длину"""
         uid = str(message.sender_id)
-        size = self.get(uid, 0)
+        size = self.get(uid + "_size", 0)
+        last = self.get(uid + "_last", 0)
+        now = time.time()
+        if now - last < self.config["cooldown"]:
+            mins = int((self.config["cooldown"] - (now - last)) // 60) + 1
+            await utils.answer(message, self.strings["wait"].format(mins=mins))
+            return
         if size == 0:
-            size = random.randint(1, 30)
-            self.set(uid, size)
-        await utils.answer(message, f"твой дилдак сейчас <b>{size} см</b>")
+            new_size = random.randint(1, 30)
+            self.set(uid + "_size", new_size)
+            self.set(uid + "_last", now)
+            await utils.answer(message, f"твой дилдак вырос до <b>{new_size} см</b>")
+        else:
+            grow = random.randint(1, 10)
+            new_size = size + grow
+            self.set(uid + "_size", new_size)
+            self.set(uid + "_last", now)
+            await utils.answer(
+                message,
+                f"дилдак вырос на <b>{grow} см</b>, теперь <b>{new_size} см</b>",
+            )
 
     @loader.command(ru_doc="топ дилдаков")
     async def диктоп(self, message: Message):
         """- показывает топ по длине дилдака"""
+        raw = self._db.get(self.strings["name"], {}) or {}
         data = {
-            int(k): v for k, v in self._db.get(self.strings["name"], {}).items()
-            if k.isdigit()
+            int(k[:-5]): v
+            for k, v in raw.items()
+            if k.endswith("_size") and k[:-5].isdigit()
         }
         if not data:
             await utils.answer(message, self.strings["no_top"])
@@ -108,8 +131,8 @@ class DickMeterMod(loader.Module):
             return
         uid = str(reply.sender_id)
         grow = random.randint(self.config["min_grow"], self.config["max_grow"])
-        new_size = self.get(uid, 0) + grow
-        self.set(uid, new_size)
+        new_size = self.get(uid + "_size", 0) + grow
+        self.set(uid + "_size", new_size)
         await utils.answer(
             message,
             self.strings["cheat_grow"].format(grow=grow, size=new_size),
