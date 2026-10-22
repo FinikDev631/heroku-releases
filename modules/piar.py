@@ -33,10 +33,12 @@ class PiarMod(loader.Module):
         self._running = False
 
     async def _loop(self, message: Message, interval: int, text: str):
+        chat_id = message.chat_id
+
         try:
             while True:
                 try:
-                    await utils.answer(message, text)
+                    await self._client.send_message(chat_id, text)
                 except Exception:
                     logger.exception("Failed to send piar message")
 
