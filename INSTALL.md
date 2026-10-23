@@ -11,13 +11,16 @@ Termux не поддерживается — часть зависимостей
 
 ## 2. Установи Heroku
 
-В терминале UserLAnd (Ubuntu) — одна команда:
+В терминале UserLAnd (Ubuntu) — две команды:
 
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/master/install.sh)
+sudo curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/master/install.sh -o install.sh
+sudo bash install.sh
 ```
 
 Скрипт сам установит всё нужное, получит код и запустит бота. Останется ввести номер телефона и код из Telegram.
+
+> Обязательно второй командой — `bash install.sh`, а не `bash <(curl ...)`. Иначе у бота не будет «клавиатуры» и он не сможет спросить API ID / номер телефона (выдаст `Cancelled`).
 
 ## Проблемы и решения
 
@@ -55,7 +58,8 @@ UserLAnd останавливает Linux вместе с Android. Для пов
 2. В терминале:
 
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/master/install.sh)
+sudo curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/master/install.sh -o install.sh
+sudo bash install.sh
 ```
 
 Скрипт запомнит, что Heroku уже установлен, и просто запустит его. Если вышла новая версия — он обновится и запустит её.
