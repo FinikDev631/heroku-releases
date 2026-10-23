@@ -237,3 +237,63 @@ async def ticker(self):
 
 Хочешь опубликовать модуль для всех — отправь файл FinikDev631, он будет
 добавлен в публичный репозиторий модулей.
+
+
+## ⏱️ Паузы и интервалы в модулях
+
+Массовые действия (спам, рассылка подарков, piar) часто нуждаются в настраиваемой паузе. Два правила работают лучше всего:
+
+### 1. Флаг `-d <секунды>` в команде
+
+Пользователь управляет паузой прямо из команды. Разбор флагов:
+
+```python
+# где-то в _parse: p = {"d": None, ...}
+elif t in ("-in", "-at", "-d"):
+    i += 1
+    if i >= len(tokens):
+        return None  # флаг без значения — покажем справку
+    p[t[1:]] = tokens[i]
+```
+
+Проверка значения (запятая тоже валидна, границы 0..300):
+
+```python
+delay = None
+if p["d"] is not None:
+    delay = max(0.0, min(float(p["d"].replace(",", ".")), 300.0))
+job = {..., "delay": delay}
+```
+
+Пауза после каждого шага, кроме последнего; без флага — значение из конфига:
+
+```python
+pause = job.get("delay")
+pause = self.config["delay"] if pause is None else pause
+if i < job["count"] - 1 and pause > 0:
+    await asyncio.sleep(pause)
+```
+
+Использование: `.sendgift 101 @user x5 -d 2` — 5 подарков с паузой 2 сек.
+Если флаг не писать — берётся настройка `delay` (по умолчанию 0, то есть без паузы).
+
+### 2. Реальный интервал в цикле (как в модуле Piar)
+
+Если твой модуль шлёт сообщения по кругу (`.piar`), интервал считай от **момента отправки**, а сбои и FloodWait обрабатывай в одном месте:
+
+```python
+while True:
+    started = time.time()
+    try:
+        await self._client.send_message(chat_id, text)
+    except FloodWaitError as e:
+        await asyncio.sleep(e.duration + 1)
+        continue
+    except Exception:
+        logger.exception("Failed to send")
+
+    elapsed = time.time() - started
+    await asyncio.sleep(max(1, interval - elapsed))
+```
+
+**Не вставляй искусственные паузы**: Heroku больше не добавляет к отправке защиту-паузу по умолчанию (антиспам-модуль APILimiter выключен, включается только вручную через `.api_fw_protection`). Если после отключения лимитера какой-то цикл всё ещё тормозит — это пауза в самом модуле.
