@@ -257,19 +257,27 @@ install_from_release() {
 	[ -n "$url" ] || fail "В последнем релизе нет архива исходников." 6
 
 	info "Скачиваю Heroku..."
-	if [ -d "$APP_NAME" ]; then
-		rm -rf "$APP_NAME/heroku"
-		rm -f "$APP_NAME/requirements.txt"
+	if [ -f ".setup_complete" ]; then
+		# Обновление поверх текущей установки: раскладываем код прямо здесь
+		target_dir="."
+		rm -rf ./heroku
 	else
-		mkdir -p "$APP_NAME"
+		target_dir="$APP_NAME"
+		if [ -d "$APP_NAME" ]; then
+			rm -rf "$APP_NAME/heroku"
+		else
+			mkdir -p "$APP_NAME"
+		fi
 	fi
-	run curl -fsSL -o "$APP_NAME/heroku-src.enc" "$url"
+	run curl -fsSL -o "heroku-src.enc" "$url"
 
-	run openssl enc -d -aes-256-cbc -pbkdf2 -in "$APP_NAME/heroku-src.enc" -out "$APP_NAME/heroku.tar.gz" -pass "pass:$SRC_KEY"
-	rm -f "$APP_NAME/heroku-src.enc"
-	run tar -xzf "$APP_NAME/heroku.tar.gz" -C "$APP_NAME"
-	rm -f "$APP_NAME/heroku.tar.gz"
-	cd "$APP_NAME"
+	run openssl enc -d -aes-256-cbc -pbkdf2 -in "heroku-src.enc" -out "heroku.tar.gz" -pass "pass:$SRC_KEY"
+	rm -f "heroku-src.enc"
+	run tar -xzf "heroku.tar.gz" -C "$target_dir"
+	rm -f "heroku.tar.gz"
+	if [ "$target_dir" != "." ]; then
+		cd "$target_dir"
+	fi
 }
 
 current_version() {
