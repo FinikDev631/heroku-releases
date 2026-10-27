@@ -55,14 +55,12 @@ sudo update-ca-certificates
 UserLAnd останавливает Linux вместе с Android. Для повторного запуска:
 
 1. Открой UserLAnd → сессия Ubuntu
-2. В терминале:
-
-```bash
-sudo curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/master/install.sh -o install.sh
-sudo bash install.sh
-```
+2. Если установщика нет в папке — скачай: `sudo curl -fsSL https://raw.githubusercontent.com/FinikDev631/heroku-releases/master/install.sh -o install.sh`
+3. Запусти: `sudo bash install.sh`
 
 Скрипт запомнит, что Heroku уже установлен, и просто запустит его. Если вышла новая версия — он обновится и запустит её.
+
+> Не запускай через `bash <(curl ...)` — у бота не будет «клавиатуры», и он не сможет спросить API ID или код (`Cancelled`).
 
 > Android может убивать фоновый процесс. Отключи оптимизацию батареи для UserLAnd (Настройки → Батарея → Не ограничивать).
 
